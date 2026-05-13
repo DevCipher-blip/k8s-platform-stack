@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.postgres.name }}
+  labels:
+    app: {{ .Values.postgres.label }}
+spec:
+  replicas: {{ .Values.deployment.postgresReplicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.postgres.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.postgres.label }}
+    spec:
+      containers:
+      - name: postgress
+        image: {{ .Values.postgres.image }}
+        ports:
+        - containerPort: {{ .Values.postgres.port }}
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secret.name }}
+              key: {{ .Values.postgres.userSecretKey }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secret.name }}
+              key: {{ .Values.postgres.passwordSecretKey }}

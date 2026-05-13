@@ -1,0 +1,56 @@
+webapp:
+  name: webapp-deployment
+  label: webapp
+  image: mehakisrar/oms-api:latest
+  port: 3000 
+  service:
+    name: webapp-service
+    type: NodePort
+    nodePort: 30102
+    port: 3000
+    targetPort: 3000
+
+
+postgres:
+  name: postgres-deployment
+  label: postgres
+  port: 5432
+  image: postgres:14.1
+  userSecretKey: postgres-user
+  passwordSecretKey: postgres-password
+  url: postgres-url
+  service:
+    name: postgres-service
+    port: 5432
+    targetPort: 5432 
+
+secret:
+  name: postgres-secret
+  data:
+    postgres-user: cG9zdGdyZXNzLXVzZXI=
+    postgres-password: ""  # required: --set secret.data.postgres-password=<base64>
+
+configMap:
+  name: postgres-config
+  data:
+    postgres-url: postgres-service
+
+
+persistentVolume:
+  name: db-data-pv
+  storage: 1Gi
+  storageClassName: generic
+  hostPath: /var/lib/postgres/data
+
+
+persistentVolumeClaim:
+  name: db-data-pvc
+  storage: 500Mi
+  storageClassName: generic
+  accessModes:
+    - ReadWriteOnce
+
+
+deployment:
+  postgresReplicas: 1
+  webappReplicas: 1
