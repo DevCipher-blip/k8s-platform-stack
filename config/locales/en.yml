@@ -1,0 +1,20 @@
+en:
+  application:
+    exceptions:
+      missing_parameter: Missing parameter %{parameters}
+      record_not_found: 'Record(s) not found: %{resource}'
+      record_not_unique: Another record with provide detail(s) already exists
+      unauthorized: You're not authorized to perform this action. Please contact Admin
+  customer:
+    errors:
+      deletion: Customer with Order(s) cannot be deleted
+    notifications:
+      email:
+        subject: Complete invitation
+        welcome: Welcome
+  product:
+    errors:
+      deletion: Purchased product cannot be deleted
+      upc:
+        read_only: Cannot be changed
+

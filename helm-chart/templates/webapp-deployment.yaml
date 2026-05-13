@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.webapp.name }}
+  labels:
+    app: {{ .Values.webapp.label }}
+spec:
+  replicas: {{ .Values.deployment.webappReplicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.webapp.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.webapp.label }}
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-credentials
+      containers:
+        - name: webapp
+          image: {{ .Values.webapp.image }}
+          ports:
+            - containerPort: {{ .Values.webapp.port }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.postgres.userSecretKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.postgres.passwordSecretKey }}
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.name }}
+                  key: {{ .Values.postgres.url }}
+          volumeMounts:
+            - mountPath: {{ .Values.persistentVolume.hostPath}}
+              name: userdata-volume
+      volumes:
+        - name: userdata-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistentVolumeClaim.name }}
