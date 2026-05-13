@@ -12,11 +12,11 @@ class Customer < User
   private
 
     def send_welcome_email
-      CustomerMailer.welcome_customer(name, email).deliver!
+      CustomerMailer.welcome_customer(name, email).deliver_later
     end
 
     def validate_deletion
-      return if orders.blank?
+      return unless orders.exists?
 
       errors.add(:base, I18n.t('customer.errors.deletion'))
 

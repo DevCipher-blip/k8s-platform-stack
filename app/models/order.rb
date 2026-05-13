@@ -8,16 +8,19 @@ class Order < ApplicationRecord
   validates :number, :date, :payment_type, :line_items, :shipping_address, presence: true
   validates :number, uniqueness: true, numericality: { greater_than: 0 }
 
-  enum :payment_type, { cash: 'cash', credit_card: 'credit_card', check: 'check', other: 'other' }
+  # validate: true turns an unknown payment type into a 422 instead of an ArgumentError.
+  enum :payment_type, { cash: 'cash', credit_card: 'credit_card', check: 'check', other: 'other' }, validate: true
 
   accepts_nested_attributes_for :shipping_address
   accepts_nested_attributes_for :line_items
 
-  after_create_commit :update_total_value
+  before_save :assign_total_value
 
   private
 
-    def update_total_value
-      update!(total_value: line_items.sum(:product_price))
+    # Runs after validation, when each new line item has already copied its
+    # unit price from the product.
+    def assign_total_value
+      self.total_value = line_items.reject(&:marked_for_destruction?).sum(&:subtotal)
     end
 end

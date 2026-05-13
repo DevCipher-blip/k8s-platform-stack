@@ -8,7 +8,7 @@ RSpec.describe 'Orders', type: :request do
 
   def order_payload(number: 501)
     { order: { number: number, date: '2026-11-01', payment_type: 'credit_card',
-               line_items_attributes: [{ product_id: product.id, product_quantity: 3, product_price: 10 }],
+               line_items_attributes: [{ product_id: product.id, product_quantity: 3 }],
                shipping_address_attributes: { address_line: '1 Main St', city: 'Springfield', state: 'IL',
                                               zip_code: '62701', country_code: 'US' } } }
   end
@@ -20,6 +20,16 @@ RSpec.describe 'Orders', type: :request do
 
       expect(response).to have_http_status(:created)
       expect(customer.orders.count).to eq(1)
+    end
+
+    it 'prices line items from the catalogue and totals them' do
+      payload = order_payload
+      payload[:order][:line_items_attributes][0][:product_price] = 0.01
+
+      post "/api/v1/customers/#{customer.id}/orders", params: payload, headers: auth_headers_for(customer), as: :json
+
+      expect(response).to have_http_status(:created)
+      expect(json['total_value']).to eq('30.0')
     end
 
     it 'forbids a customer from placing an order for someone else' do

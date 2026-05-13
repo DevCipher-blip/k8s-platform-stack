@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'support@oms.magaya.org'
+  default from: -> { ENV.fetch('SENDER_EMAIL', 'support@example.com') }
 
   layout 'mailer'
 end

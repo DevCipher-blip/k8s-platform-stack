@@ -40,7 +40,7 @@ module Orders
         end
 
         def generic_line_items_params
-          %i(product_id product_quantity product_price)
+          %i(product_id product_quantity)
         end
 
         def generic_shipping_address_params

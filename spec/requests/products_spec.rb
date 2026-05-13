@@ -20,6 +20,15 @@ RSpec.describe 'Products', type: :request do
     expect(response).to have_http_status(:created)
   end
 
+  it 'lets admins update a product' do
+    product = create(:product, price: 10)
+
+    put "/api/v1/products/#{product.id}", params: payload, headers: auth_headers_for(admin), as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(product.reload.price).to eq(BigDecimal('39.9'))
+  end
+
   it 'forbids customers from creating products' do
     post '/api/v1/products', params: payload, headers: auth_headers_for(customer), as: :json
 

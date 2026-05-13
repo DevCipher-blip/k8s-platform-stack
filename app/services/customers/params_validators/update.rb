@@ -15,16 +15,10 @@ module Customers
 
       private
 
+        # Every field is optional on update; requiring all of them forced a
+        # password change just to edit a phone number.
         def required_and_permitted_params
-          required_params
-
           params.require(:customer).permit(generic_params)
-        end
-
-        def required_params
-          params.require(:customer).tap do |customer_params|
-            customer_params.require(generic_params)
-          end
         end
 
         def generic_params
