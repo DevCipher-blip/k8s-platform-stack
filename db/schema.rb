@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_18_141934) do
+ActiveRecord::Schema.define(version: 2026_11_10_090000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,7 +38,7 @@ ActiveRecord::Schema.define(version: 2022_02_18_141934) do
   end
 
   create_table "products", force: :cascade do |t|
-    t.bigint "upc", default: -> { "nextval('products_upc_sequence'::regclass)" }, null: false
+    t.bigserial "upc", null: false
     t.string "title", null: false
     t.text "description", null: false
     t.decimal "price", precision: 8, scale: 2, null: false
