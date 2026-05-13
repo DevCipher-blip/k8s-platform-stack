@@ -3,15 +3,9 @@
 module Api
   module V1
     class ProductsController < Auth::BaseController
-      before_action :authenticate_user!, except: :index
+      skip_before_action :authenticate_user!, only: :index
 
-      actions :create, :update, :destroy
-
-      def index
-        raise ActiveRecord::RecordNotFound, controller_name.camelize.singularize if relation.blank?
-
-        render json: serialize(collection, serializer)
-      end
+      actions :index, :create, :update, :destroy
 
       private
 

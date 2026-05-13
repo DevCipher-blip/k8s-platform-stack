@@ -1,23 +1,19 @@
 # frozen_string_literal: true
 
-class OrderPolicy
-  attr_reader :user, :record
-
-  def initialize(user, record)
-    @user = user
-    @record = record
-  end
-
+class OrderPolicy < ApplicationPolicy
+  # `record` is the Customer whose orders are being listed.
   def index?
-    user.admin? || record.pluck(:customer_id).include?(user.id)
+    admin? || user.id == record.id
   end
 
+  # A customer may only place orders for themselves; admins may place them
+  # for anyone.
   def create?
-    user.admin? || user.customer?
+    admin? || (user.customer? && user.id == record.customer_id)
   end
 
   def show?
-    user.admin? || user.id == record.customer_id
+    admin? || user.id == record.customer_id
   end
 
   def destroy?

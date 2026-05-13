@@ -20,34 +20,17 @@ class ApplicationPolicy
     false
   end
 
-  def new?
-    create?
-  end
-
   def update?
     false
-  end
-
-  def edit?
-    update?
   end
 
   def destroy?
     false
   end
 
-  class Scope
-    def initialize(user, scope)
-      @user = user
-      @scope = scope
+  private
+
+    def admin?
+      user&.admin? || false
     end
-
-    def resolve
-      scope.all if user.admin?
-    end
-
-    private
-
-      attr_reader :user, :scope
-  end
 end

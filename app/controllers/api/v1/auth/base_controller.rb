@@ -6,16 +6,12 @@ module Api
       class BaseController < Api::V1::BaseController
         include Pundit::Authorization
 
-        before_action :authorize_user!, except: %i(index create)
-
-        def index
-          authorize model
-
-          super
-        end
+        # Authentication must run before authorization, or the policies see a nil user.
+        before_action :authenticate_user!
+        before_action :authorize_user!, except: :create
 
         def create
-          authorize model
+          authorize new_resource, :create?, policy_class: policy_class
 
           super
         end
@@ -23,11 +19,17 @@ module Api
         private
 
           def authorize_user!
-            raise Pundit::NotAuthorizedError unless authorized?
+            authorize policy_target, "#{action_name}?", policy_class: policy_class
           end
 
-          def authorized?
-            "#{model}Policy".constantize.new(current_user, record).send("#{action_name}?")
+          # Collection actions are authorized against the model class; member
+          # actions against the loaded record.
+          def policy_target
+            action_name == 'index' ? model : record
+          end
+
+          def policy_class
+            "#{model}Policy".constantize
           end
       end
     end

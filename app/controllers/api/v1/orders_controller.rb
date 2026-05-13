@@ -3,21 +3,12 @@
 module Api
   module V1
     class OrdersController < Auth::BaseController
-      before_action :authenticate_user!
-      before_action :authorize_user!, except: :create
-
-      actions :create, :show, :destroy
-
-      def index
-        raise ActiveRecord::RecordNotFound, controller_name.camelize.singularize if relation.blank?
-
-        render json: serialize(collection, serializer)
-      end
+      actions :index, :create, :show, :destroy
 
       private
 
         def relation
-          @relation ||= customer.orders.all
+          @relation ||= customer.orders
         end
 
         def customer
@@ -36,9 +27,9 @@ module Api
           @record ||= customer.orders.find(params[:id])
         end
 
-        def authorized?
-          "#{model}Policy".constantize.new(current_user, action_name == 'index' ? relation : record)
-                          .send("#{action_name}?")
+        # Listing is authorized against the customer whose orders are listed.
+        def policy_target
+          action_name == 'index' ? customer : record
         end
     end
   end

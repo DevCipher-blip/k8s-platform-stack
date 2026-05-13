@@ -11,6 +11,9 @@ gem 'pg', '~> 1.6'
 gem 'puma', '~> 7.0'
 gem 'rack-cors'
 
+# json 3.x drops the quirks_mode option ActiveSupport 8.0 still passes when encoding.
+gem 'json', '~> 2.10'
+
 gem 'active_model_serializers', '~> 0.10.15'
 gem 'devise_token_auth', '~> 1.2'
 gem 'dotenv-rails'

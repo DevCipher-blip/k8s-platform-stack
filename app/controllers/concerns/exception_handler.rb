@@ -24,7 +24,7 @@ module ExceptionHandler
     end
 
     rescue_from Pundit::NotAuthorizedError do |_e|
-      render json: { message: I18n.t('application.exceptions.unauthorized') }, status: :unauthorized
+      render json: { message: I18n.t('application.exceptions.unauthorized') }, status: :forbidden
     end
   end
 end

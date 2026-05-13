@@ -1,30 +1,23 @@
 # frozen_string_literal: true
 
-class CustomerPolicy
-  attr_reader :user, :record
-
-  def initialize(user, record)
-    @user = user
-    @record = record
-  end
-
+class CustomerPolicy < ApplicationPolicy
   def index?
-    user.admin?
+    admin?
   end
 
   def create?
-    user.admin?
+    admin?
   end
 
   def show?
-    user.admin? || user.id == record.id
+    admin? || user.id == record.id
   end
 
   def update?
-    user.admin? || user.id == record.id
+    show?
   end
 
   def destroy?
-    user.admin? || user.id == record.id
+    show?
   end
 end
