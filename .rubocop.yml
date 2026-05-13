@@ -1,13 +1,14 @@
 inherit_from: .rubocop_todo.yml
 
-require:
+plugins:
   - rubocop-performance
   - rubocop-rails
 
 AllCops:
-  TargetRubyVersion: 2.7.1
-  TargetRailsVersion: 6.0.4.4
+  TargetRubyVersion: 3.4
+  TargetRailsVersion: 8.0
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'db/schema.rb'
     - 'db/migrate/**/*'
@@ -20,7 +21,6 @@ Rails/UnknownEnv:
     - production
     - development
     - test
-    - staging
 Layout/IndentationConsistency:
   EnforcedStyle: indented_internal_methods
 
@@ -150,7 +150,7 @@ Layout/SpaceInLambdaLiteral:
 Layout/LineLength:
   Enabled: true
   Max: 120
-  IgnoredPatterns: ['\A#']
+  AllowedPatterns: ['\A#']
   Include:
     - 'app/controllers/**'
     - 'app/helpers/**'
@@ -234,3 +234,7 @@ Style/PercentLiteralDelimiters:
     '%w': '()'
   Exclude:
     - 'config/**/**'
+
+# Route segments such as :id are always present; params.expect adds nothing there.
+Rails/StrongParametersExpect:
+  Enabled: false

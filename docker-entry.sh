@@ -1,8 +1,12 @@
 #!/bin/sh
 set -e
 
-rm -f /oms-api/tmp/pids/server.pid
+rm -f tmp/pids/server.pid
 
-rails server -b "0.0.0.0"
+# Creates the database and loads the schema on first boot, runs pending
+# migrations afterwards. Disable it when migrations run as a separate job.
+if [ "${RUN_DB_PREPARE:-true}" = "true" ]; then
+  bin/rails db:prepare
+fi
 
 exec "$@"

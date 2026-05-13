@@ -8,7 +8,7 @@ class Order < ApplicationRecord
   validates :number, :date, :payment_type, :line_items, :shipping_address, presence: true
   validates :number, uniqueness: true, numericality: { greater_than: 0 }
 
-  enum payment_type: { cash: 'cash', credit_card: 'credit_card', check: 'check', other: 'other' }
+  enum :payment_type, { cash: 'cash', credit_card: 'credit_card', check: 'check', other: 'other' }
 
   accepts_nested_attributes_for :shipping_address
   accepts_nested_attributes_for :line_items

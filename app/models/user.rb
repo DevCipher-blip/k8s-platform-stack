@@ -22,6 +22,6 @@ class User < ApplicationRecord
 
   # Adds a custom attribute to the successful sign_in response
   def as_json(options = {})
-    super(options).merge({ type: type })
+    super.merge({ type: type })
   end
 end

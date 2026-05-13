@@ -71,8 +71,6 @@ Metrics/PerceivedComplexity:
 # SupportedStyles: nested, compact
 Style/ClassAndModuleChildren:
   Exclude:
-    - 'test/channels/application_cable/connection_test.rb'
-    - 'test/test_helper.rb'
 
 # Offense count: 2
 # Configuration parameters: AllowedConstants.
@@ -140,8 +138,6 @@ Style/StringLiterals:
     - 'config/application.rb'
     - 'config/environments/production.rb'
     - 'config/puma.rb'
-    - 'config/spring.rb'
-    - 'test/channels/application_cable/connection_test.rb'
 
 # Offense count: 2
 # Cop supports --auto-correct.

@@ -12,23 +12,23 @@ module Api
         render json: serialize(collection, serializer)
       end
 
+      def show
+        render json: record
+      end
+
       def create
         if new_resource.save
           render json: new_resource, each_serializer: serializer, status: :created
         else
-          render json: { message: new_resource.errors.full_messages }, status: :unprocessable_entity
+          render json: { message: new_resource.errors.full_messages }, status: :unprocessable_content
         end
-      end
-
-      def show
-        render json: record
       end
 
       def update
         if record.update(record_permitted_params)
           render json: record, each_serializer: serializer
         else
-          render json: { message: record.errors.full_messages }, status: :unprocessable_entity
+          render json: { message: record.errors.full_messages }, status: :unprocessable_content
         end
       end
 
@@ -36,7 +36,7 @@ module Api
         if record.destroy
           render json: record, each_serializer: serializer
         else
-          render json: { message: record.errors.full_messages }, status: :unprocessable_entity
+          render json: { message: record.errors.full_messages }, status: :unprocessable_content
         end
       end
 

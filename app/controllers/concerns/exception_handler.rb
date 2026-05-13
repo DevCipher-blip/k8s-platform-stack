@@ -10,17 +10,17 @@ module ExceptionHandler
     end
 
     rescue_from ActiveRecord::RecordNotUnique do |_e|
-      render json: { message: I18n.t('application.exceptions.record_not_unique') }, status: :unprocessable_entity
+      render json: { message: I18n.t('application.exceptions.record_not_unique') }, status: :unprocessable_content
     end
 
     rescue_from ActiveRecord::RecordInvalid do |e|
-      render json: { message: e.message }, status: :unprocessable_entity
+      render json: { message: e.message }, status: :unprocessable_content
     end
 
     rescue_from ActionController::ParameterMissing do |e|
       missing_params = e.message.split(':').map(&:strip).drop(1).join(', ')
       render json: { message: I18n.t('application.exceptions.missing_parameter', parameters: missing_params) },
-             status: :unprocessable_entity
+             status: :unprocessable_content
     end
 
     rescue_from Pundit::NotAuthorizedError do |_e|
