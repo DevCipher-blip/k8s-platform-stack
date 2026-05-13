@@ -8,7 +8,7 @@ module Api
       private
 
         def relation
-          @relation ||= customer.orders
+          @relation ||= customer.orders.includes(:customer, :shipping_address, line_items: :product)
         end
 
         def customer

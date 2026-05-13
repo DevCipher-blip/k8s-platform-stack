@@ -6,10 +6,9 @@ module Api
       include BaseHandler
       include SerializerHandler
 
+      # An empty page is a normal answer, not a 404.
       def index
-        raise ActiveRecord::RecordNotFound, controller_name.camelize.singularize if relation.blank?
-
-        render json: serialize(collection, serializer)
+        render json: serialize(collection.results, serializer, root: controller_name, meta: collection.meta)
       end
 
       def show
@@ -47,7 +46,7 @@ module Api
         end
 
         def collection
-          @collection ||= BaseCollection.new(relation, filter_params).results
+          @collection ||= BaseCollection.new(relation, filter_params)
         end
 
         def new_resource
@@ -63,7 +62,7 @@ module Api
         def record_permitted_params; end
 
         def filter_params
-          params.permit
+          params.permit(:page, :per_page)
         end
 
         def serializer

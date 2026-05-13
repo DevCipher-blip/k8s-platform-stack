@@ -16,4 +16,10 @@ Rails.application.configure do
 
   config.active_support.deprecation = :stderr
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Fail any request spec that triggers an N+1 query or an unused eager load.
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.raise = true
+  end
 end
