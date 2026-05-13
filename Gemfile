@@ -19,6 +19,12 @@ gem 'devise_token_auth', '~> 1.2'
 gem 'dotenv-rails'
 gem 'pundit', '~> 2.4'
 
+# Serves swagger/v1/swagger.yaml (generated from spec/requests/api) and Swagger UI at /api-docs.
+gem 'rswag-api'
+gem 'rswag-ui'
+# Leaves Ruby's default gems in 4.0; rswag-ui requires it.
+gem 'ostruct'
+
 gem 'tzinfo-data', platforms: %i(windows jruby)
 
 group :development, :test do

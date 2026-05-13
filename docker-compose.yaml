@@ -28,6 +28,8 @@ services:
       OMS_STORE_FRONT_BASE_URL: ${OMS_STORE_FRONT_BASE_URL:-http://localhost:3001}
       # No SMTP server locally: mail is built and discarded.
       MAIL_DELIVERY_METHOD: test
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
     ports:
       - "3000:3000"
     read_only: true

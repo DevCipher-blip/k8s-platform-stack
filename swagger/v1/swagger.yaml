@@ -1,0 +1,242 @@
+---
+openapi: 3.0.1
+info:
+  title: OMS API
+  version: v1
+  description: 'Order management: products, customers and their orders. Sign in at
+    POST /auth/sign_in and send the returned access-token, client and uid headers.'
+servers:
+- url: http://localhost:3000
+components:
+  securitySchemes:
+    access_token:
+      type: apiKey
+      in: header
+      name: access-token
+    client:
+      type: apiKey
+      in: header
+      name: client
+    uid:
+      type: apiKey
+      in: header
+      name: uid
+  schemas:
+    product:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+          example: '39.9'
+        upc:
+          type: integer
+        weight:
+          type: string
+          nullable: true
+        weight_unit:
+          type: string
+          nullable: true
+      required:
+      - id
+      - title
+      - description
+      - price
+      - upc
+    page_meta:
+      type: object
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total_count:
+          type: integer
+        total_pages:
+          type: integer
+    error:
+      type: object
+      properties:
+        message: {}
+paths:
+  "/auth/sign_in":
+    post:
+      summary: Sign in and receive token headers
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '200':
+          description: signed in; access-token, client and uid are returned as headers
+        '401':
+          description: bad credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/api/v1/products":
+    get:
+      summary: List the product catalogue (public)
+      tags:
+      - Products
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        description: max 100
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: a page of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/product"
+                  meta:
+                    "$ref": "#/components/schemas/page_meta"
+    post:
+      summary: Create a product (admin)
+      tags:
+      - Products
+      security:
+      - access_token: []
+        client: []
+        uid: []
+      parameters: []
+      responses:
+        '201':
+          description: created
+        '403':
+          description: signed in but not an admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    price:
+                      type: number
+                    weight:
+                      type: number
+                    weight_unit:
+                      type: string
+                      enum:
+                      - g
+                      - kg
+                      - lb
+                      - oz
+                  required:
+                  - title
+                  - description
+                  - price
+  "/api/v1/customers/{customer_id}/orders":
+    parameters:
+    - name: customer_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List a customer's orders (that customer or an admin)
+      tags:
+      - Orders
+      security:
+      - access_token: []
+        client: []
+        uid: []
+      responses:
+        '200':
+          description: a page of orders with line items and shipping address
+    post:
+      summary: Place an order; unit prices come from the catalogue
+      tags:
+      - Orders
+      security:
+      - access_token: []
+        client: []
+        uid: []
+      parameters: []
+      responses:
+        '201':
+          description: created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: object
+                  properties:
+                    number:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+                    payment_type:
+                      type: string
+                      enum:
+                      - cash
+                      - credit_card
+                      - check
+                      - other
+                    line_items_attributes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          product_id:
+                            type: integer
+                          product_quantity:
+                            type: integer
+                    shipping_address_attributes:
+                      type: object
+                      properties:
+                        address_line:
+                          type: string
+                        city:
+                          type: string
+                        state:
+                          type: string
+                        zip_code:
+                          type: string
+                        country_code:
+                          type: string
+                  required:
+                  - number
+                  - date
+                  - payment_type
+                  - line_items_attributes
+                  - shipping_address_attributes
