@@ -1,8 +1,22 @@
 webapp:
   name: webapp-deployment
   label: webapp
-  image: mehakisrar/oms-api:latest
-  port: 3000 
+  replicas: 1
+  image:
+    # Build and push it yourself: docker build -t <registry>/oms-api:1.0.0 .
+    repository: oms-api
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  # e.g. [{ name: registry-credentials }] for a private registry
+  imagePullSecrets: []
+  port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
   service:
     name: webapp-service
     type: NodePort
@@ -10,47 +24,51 @@ webapp:
     port: 3000
     targetPort: 3000
 
-
 postgres:
   name: postgres-deployment
   label: postgres
   port: 5432
-  image: postgres:14.1
-  userSecretKey: postgres-user
-  passwordSecretKey: postgres-password
-  url: postgres-url
+  database: oms_api_production
+  image:
+    repository: postgres
+    tag: "17.11"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   service:
     name: postgres-service
     port: 5432
-    targetPort: 5432 
+    targetPort: 5432
 
-secret:
-  name: postgres-secret
-  data:
-    postgres-user: cG9zdGdyZXNzLXVzZXI=
-    postgres-password: ""  # required: --set secret.data.postgres-password=<base64>
+# Credentials are never stored in this file. Either point existingSecret at a
+# Secret holding the keys postgres-user, postgres-password and secret-key-base,
+# or pass the values at install time:
+#   helm install oms ./helm-chart \
+#     --set auth.postgresPassword=... --set auth.secretKeyBase=...
+auth:
+  existingSecret: ""
+  secretName: postgres-secret
+  postgresUser: oms_api
+  postgresPassword: ""
+  secretKeyBase: ""
 
 configMap:
   name: postgres-config
-  data:
-    postgres-url: postgres-service
-
 
 persistentVolume:
+  # A hostPath volume suits a single-node local cluster (kind, minikube).
+  # Set create: false and use a StorageClass on a real cluster.
+  create: true
   name: db-data-pv
   storage: 1Gi
   storageClassName: generic
   hostPath: /var/lib/postgres/data
 
-
 persistentVolumeClaim:
   name: db-data-pvc
   storage: 500Mi
   storageClassName: generic
-  accessModes:
-    - ReadWriteOnce
-
-
-deployment:
-  postgresReplicas: 1
-  webappReplicas: 1

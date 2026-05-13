@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{  .Values.webapp.name }}
+  name: {{ .Values.webapp.name }}
   labels:
     app: {{ .Values.webapp.label }}
 spec:
-  replicas: {{ .Values.deployment.webappReplicas }}
+  replicas: {{ .Values.webapp.replicas }}
   selector:
     matchLabels:
       app: {{ .Values.webapp.label }}
@@ -13,34 +13,80 @@ spec:
     metadata:
       labels:
         app: {{ .Values.webapp.label }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+      automountServiceAccountToken: false
+      {{- with .Values.webapp.imagePullSecrets }}
       imagePullSecrets:
-        - name: dockerhub-credentials
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: webapp
-          image: {{ .Values.webapp.image }}
+          image: "{{ .Values.webapp.image.repository }}:{{ .Values.webapp.image.tag }}"
+          imagePullPolicy: {{ .Values.webapp.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.webapp.port }}
           env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secret.name }}
-                  key: {{ .Values.postgres.userSecretKey }}
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secret.name }}
-                  key: {{ .Values.postgres.passwordSecretKey }}
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configMap.name }}
-                  key: {{ .Values.postgres.url }}
+                  key: postgres-url
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "oms.secretName" . }}
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "oms.secretName" . }}
+                  key: postgres-password
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "oms.secretName" . }}
+                  key: secret-key-base
+          # db:prepare runs in the entrypoint before puma starts, so the
+          # first boot against an empty database takes longer.
+          startupProbe:
+            httpGet:
+              path: /up
+              port: {{ .Values.webapp.port }}
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: {{ .Values.webapp.port }}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: {{ .Values.webapp.port }}
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.webapp.resources | nindent 12 }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            {{- include "oms.restrictedContainer" . | nindent 12 }}
           volumeMounts:
-            - mountPath: {{ .Values.persistentVolume.hostPath}}
-              name: userdata-volume
+            # The root filesystem is read-only; Rails and Puma write only here.
+            - name: tmp
+              mountPath: /app/tmp
+            - name: system-tmp
+              mountPath: /tmp
       volumes:
-        - name: userdata-volume
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistentVolumeClaim.name }}
+        - name: tmp
+          emptyDir: {}
+        - name: system-tmp
+          emptyDir: {}

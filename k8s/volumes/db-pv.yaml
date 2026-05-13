@@ -12,6 +12,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: "/var/lib/postgres/data"
-
-
-
