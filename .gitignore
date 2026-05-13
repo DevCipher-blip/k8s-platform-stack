@@ -31,3 +31,17 @@
 
 *.idea/
 *.DS_Store
+
+# Local environments and generated files
+.venv/
+venv/
+env/
+project_venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env.*
+!.env.example
+!.env.sample
+.DS_Store
